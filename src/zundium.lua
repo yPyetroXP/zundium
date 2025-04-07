@@ -13,11 +13,12 @@ local ZundiumConfig = {
         TextColor = Color3.fromRGB(220, 220, 220),
         ToggleOnColor = Color3.fromRGB(0, 255, 120),
         ToggleOffColor = Color3.fromRGB(50, 50, 55),
-        SliderColor = Color3.fromRGB(80, 80, 85)
+        SliderColor = Color3.fromRGB(80, 80, 85),
+        Transparency = 0.2  -- Adicionado a propriedade de transparência que faltava
     },
     Version = "1.3 by yPyetroXP",
     AnimationSpeed = 0.25
-} -- <--- Faltava este "}"
+}
 
 -- Função principal para criar uma janela
 function Zundium:CreateWindow(title)
@@ -32,7 +33,7 @@ function Zundium:CreateWindow(title)
     local UIListLayout = Instance.new("UIListLayout")
     local UIPadding = Instance.new("UIPadding")
 
-    ScreenGui.Name = "ZundiumUI_" .. tostring(math.random(1000sha9999))
+    ScreenGui.Name = "ZundiumUI_" .. tostring(math.random(1000, 9999))  -- Corrigido o erro na geração do número aleatório
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     ScreenGui.ResetOnSpawn = false
 
@@ -126,11 +127,22 @@ function Zundium:CreateWindow(title)
 
     -- Sistema de minimizar
     local minimized = false
+    local originalHeight = 350  -- Mantém a altura original para restaurar corretamente
+    
     MinimizeButton.MouseButton1Click:Connect(function()
         minimized = not minimized
-        local targetSize = minimized and UDim2.new(0, 300, 0, 25) or UDim2.new(0, 300, 0, 350)
-        local tween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Sine), {Size = targetSize})
-        tween:Play()
+        -- Salva a altura atual antes de minimizar se necessário
+        if not minimized and MainFrame.Size.Y.Offset <= 25 then
+            -- Restaura para a altura original
+            local targetSize = UDim2.new(0, 300, 0, originalHeight)
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Sine), {Size = targetSize})
+            tween:Play()
+        else
+            -- Minimiza para apenas a barra de título
+            local targetSize = UDim2.new(0, 300, 0, 25)
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Sine), {Size = targetSize})
+            tween:Play()
+        end
         Container.Visible = not minimized
         MinimizeButton.Text = minimized and "+" or "−"
     end)
@@ -161,7 +173,15 @@ function Zundium:CreateWindow(title)
         Button.TextSize = 14
         UICorner.Parent = Button
         UICorner.CornerRadius = UDim.new(0, 6)
-        Button.MouseButton1Click:Connect(callback)
+        
+        -- Adicionado tratamento de erro no callback
+        Button.MouseButton1Click:Connect(function()
+            local success, error = pcall(callback)
+            if not success then
+                warn("Erro no callback do botão '" .. text .. "':", error)
+            end
+        end)
+        
         table.insert(self.Elements, Button)
         return Button
     end
@@ -181,13 +201,23 @@ function Zundium:CreateWindow(title)
         Toggle.TextSize = 14
         UICorner.Parent = Toggle
         UICorner.CornerRadius = UDim.new(0, 6)
+        
         Toggle.MouseButton1Click:Connect(function()
             state = not state
             Toggle.Text = text .. (state and " [ON]" or " [OFF]")
             local targetColor = state and ZundiumConfig.Theme.ToggleOnColor or ZundiumConfig.Theme.ToggleOffColor
             TweenService:Create(Toggle, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Sine), {BackgroundColor3 = targetColor}):Play()
-            callback(state)
+            
+            -- Adicionado tratamento de erro no callback
+            local success, error = pcall(function()
+                callback(state)
+            end)
+            
+            if not success then
+                warn("Erro no callback do toggle '" .. text .. "':", error)
+            end
         end)
+        
         table.insert(self.Elements, Toggle)
         return Toggle
     end
@@ -207,11 +237,20 @@ function Zundium:CreateWindow(title)
         TextBox.TextSize = 14
         UICorner.Parent = TextBox
         UICorner.CornerRadius = UDim.new(0, 6)
+        
         TextBox.FocusLost:Connect(function(enterPressed)
             if enterPressed then
-                callback(TextBox.Text)
+                -- Adicionado tratamento de erro no callback
+                local success, error = pcall(function()
+                    callback(TextBox.Text)
+                end)
+                
+                if not success then
+                    warn("Erro no callback do textbox:", error)
+                end
             end
         end)
+        
         table.insert(self.Elements, TextBox)
         return TextBox
     end
@@ -278,11 +317,20 @@ function Zundium:CreateWindow(title)
             OptionButton.TextSize = 14
             OptionUICorner.Parent = OptionButton
             OptionUICorner.CornerRadius = UDim.new(0, 6)
+            
             OptionButton.MouseButton1Click:Connect(function()
                 Dropdown.Text = option
                 isOpen = false
                 updateDropdown()
-                callback(option)
+                
+                -- Adicionado tratamento de erro no callback
+                local success, error = pcall(function()
+                    callback(option)
+                end)
+                
+                if not success then
+                    warn("Erro no callback do dropdown:", error)
+                end
             end)
         end
 
@@ -299,6 +347,7 @@ function Zundium:CreateWindow(title)
         local SliderKnob = Instance.new("Frame")
         local UICornerBar = Instance.new("UICorner")
         local UICornerFill = Instance.new("UICorner")
+        local UICornerKnob = Instance.new("UICorner")  -- Adicionado corner para o knob
         local value = default or min
 
         SliderFrame.Parent = Container
@@ -333,6 +382,8 @@ function Zundium:CreateWindow(title)
         SliderKnob.BackgroundColor3 = ZundiumConfig.Theme.TextColor
         SliderKnob.BackgroundTransparency = 0.2
         SliderKnob.Position = UDim2.new((value - min) / (max - min), -5, 0, -3)
+        UICornerKnob.Parent = SliderKnob
+        UICornerKnob.CornerRadius = UDim.new(0, 5)  -- Arredonda o knob
 
         local dragging = false
         SliderKnob.InputBegan:Connect(function(input)
@@ -354,7 +405,15 @@ function Zundium:CreateWindow(title)
                 SliderKnob.Position = UDim2.new(relativeX, -5, 0, -3)
                 SliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
                 SliderLabel.Text = text .. ": " .. value
-                callback(value)
+                
+                -- Adicionado tratamento de erro no callback
+                local success, error = pcall(function()
+                    callback(value)
+                end)
+                
+                if not success then
+                    warn("Erro no callback do slider:", error)
+                end
             end
         end)
 
@@ -375,6 +434,14 @@ function Zundium:CreateWindow(title)
         table.insert(self.Elements, Label)
         return Label
     end
+
+    -- Determina a altura baseada no conteúdo (para melhorar a minimização/restauração)
+    UIListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        if not minimized then
+            originalHeight = UIListLayout.AbsoluteContentSize.Y + 40  -- Adiciona espaço extra para padding
+            MainFrame.Size = UDim2.new(0, 300, 0, originalHeight)
+        end
+    end)
 
     return Window
 end
