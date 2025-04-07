@@ -7,28 +7,30 @@ local TweenService = game:GetService("TweenService")
 -- Configurações globais
 local ZundiumConfig = {
     Theme = {
-        PrimaryColor = Color3.fromRGB(50, 50, 50),
-        AccentColor = Color3.fromRGB(0, 170, 255),
-        TextColor = Color3.fromRGB(255, 255, 255),
-        ToggleOnColor = Color3.fromRGB(0, 255, 100),
-        ToggleOffColor = Color3.fromRGB(80, 80, 80),
-        SliderColor = Color3.fromRGB(100, 100, 100)
+        PrimaryColor = Color3.fromRGB(20, 20, 25),        -- Fundo escuro quase preto
+        AccentColor = Color3.fromRGB(0, 200, 255),        -- Ciano neon
+        SecondaryColor = Color3.fromRGB(35, 35, 40),      -- Cinza escuro para contraste
+        TextColor = Color3.fromRGB(220, 220, 220),        -- Texto claro
+        ToggleOnColor = Color3.fromRGB(0, 255, 120),      -- Verde neon
+        ToggleOffColor = Color3.fromRGB(50, 50, 55),      -- Cinza apagado
+        SliderColor = Color3.fromRGB(80, 80, 85)          -- Cinza para sliders
     },
-    Version = "1.2 by yPyetroXP",
-    AnimationSpeed = 0.3 -- Velocidade das animações em segundos
-}
+    Version = "1.3 by yPyetroXP",
+    AnimationSpeed = 0.25 -- Ancodecs
 
 -- Função principal para criar uma janela
 function Zundium:CreateWindow(title)
     local ScreenGui = Instance.new("ScreenGui")
     local MainFrame = Instance.new("Frame")
-    local TitleBar = Instance.new("TextLabel")
-    local Container = Instance.new("Frame")
-    local UIListLayout = Instance.new("UIListLayout")
+    local UICorner = Instance.new("UICorner")
+    local TitleBar = Instance.new("Frame")
+    local TitleLabel = Instance.new("TextLabel")
     local MinimizeButton = Instance.new("TextButton")
     local HideButton = Instance.new("TextButton")
+    local Container = Instance.new("Frame")
+    local UIListLayout = Instance.new("UIListLayout")
+    local UIPadding = Instance.new("UIPadding")
 
-    -- Configuração básica da janela
     ScreenGui.Name = "ZundiumUI_" .. tostring(math.random(1000, 9999))
     ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
     ScreenGui.ResetOnSpawn = false
@@ -40,41 +42,58 @@ function Zundium:CreateWindow(title)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true
 
-    TitleBar.Parent = MainFrame
-    TitleBar.Size = UDim2.new(1, -60, 0, 30) -- Ajustado para dois botões
-    TitleBar.BackgroundColor3 = ZundiumConfig.Theme.AccentColor
-    TitleBar.Text = "Zundium - " .. title .. " | " .. ZundiumConfig.Version
-    TitleBar.TextColor3 = ZundiumConfig.Theme.TextColor
-    TitleBar.TextSize = 16
-    TitleBar.Font = Enum.Font.SourceSansBold
+    UICorner.Parent = MainFrame
+    UICorner.CornerRadius = UDim.new(0, 8) -- Bordas arredondadas
 
-    MinimizeButton.Parent = MainFrame
+    TitleBar.Parent = MainFrame
+    TitleBar.Size = UDim2.new(1, 0, 0, 30)
+    TitleBar.BackgroundColor3 = ZundiumConfig.Theme.AccentColor
+    TitleBar.BorderSizePixel = 0
+
+    TitleLabel.Parent = TitleBar
+    TitleLabel.Size = UDim2.new(1, -60, 1, 0)
+    TitleLabel.Position = UDim2.new(0, 5, 0, 0)
+    TitleLabel.BackgroundTransparency = 1
+    TitleLabel.Text = "Zundium - " .. title .. " | " .. ZundiumConfig.Version
+    TitleLabel.TextColor3 = ZundiumConfig.Theme.TextColor
+    TitleLabel.TextSize = 16
+    TitleLabel.Font = Enum.Font.GothamBold
+    TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+    MinimizeButton.Parent = TitleBar
     MinimizeButton.Size = UDim2.new(0, 30, 0, 30)
     MinimizeButton.Position = UDim2.new(1, -60, 0, 0)
-    MinimizeButton.BackgroundColor3 = ZundiumConfig.Theme.AccentColor
+    MinimizeButton.BackgroundColor3 = ZundiumConfig.Theme.SecondaryColor
     MinimizeButton.Text = "-"
     MinimizeButton.TextColor3 = ZundiumConfig.Theme.TextColor
     MinimizeButton.TextSize = 16
+    MinimizeButton.Font = Enum.Font.Gotham
 
-    HideButton.Parent = MainFrame
+    HideButton.Parent = TitleBar
     HideButton.Size = UDim2.new(0, 30, 0, 30)
     HideButton.Position = UDim2.new(1, -30, 0, 0)
-    HideButton.BackgroundColor3 = ZundiumConfig.Theme.AccentColor
+    HideButton.BackgroundColor3 = ZundiumConfig.Theme.SecondaryColor
     HideButton.Text = "X"
     HideButton.TextColor3 = ZundiumConfig.Theme.TextColor
     HideButton.TextSize = 16
+    HideButton.Font = Enum.Font.Gotham
 
     Container.Parent = MainFrame
-    Container.Size = UDim2.new(1, -10, 1, -40)
-    Container.Position = UDim2.new(0, 5, 0, 35)
+    Container.Size = UDim2.new(1, 0, 1, -40)
+    Container.Position = UDim2.new(0, 0, 0, 35)
     Container.BackgroundTransparency = 1
 
     UIListLayout.Parent = Container
-    UIListLayout.Padding = UDim.new(0, 5)
+    UIListLayout.Padding = UDim.new(0, 8)
     UIListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
+    UIPadding.Parent = Container
+    UIPadding.PaddingLeft = UDim.new(0, 8)
+    UIPadding.PaddingRight = UDim.new(0, 8)
+    UIPadding.PaddingTop = UDim.new(0, 8)
+
     -- Animação de abertura
-    local openTween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Quad), {Size = UDim2.new(0, 350, 0, 400)})
+    local openTween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Quart), {Size = UDim2.new(0, 350, 0, 400)})
     openTween:Play()
 
     -- Sistema de arrastar
@@ -107,23 +126,23 @@ function Zundium:CreateWindow(title)
         end
     end)
 
-    -- Sistema de minimizar com animação
+    -- Sistema de minimizar
     local minimized = false
     MinimizeButton.MouseButton1Click:Connect(function()
         minimized = not minimized
         local targetSize = minimized and UDim2.new(0, 350, 0, 30) or UDim2.new(0, 350, 0, 400)
-        local tween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Quad), {Size = targetSize})
+        local tween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Quart), {Size = targetSize})
         tween:Play()
         Container.Visible = not minimized
         MinimizeButton.Text = minimized and "+" or "-"
     end)
 
-    -- Sistema de esconder com animação
+    -- Sistema de esconder
     HideButton.MouseButton1Click:Connect(function()
-        local closeTween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Quad), {Size = UDim2.new(0, 350, 0, 0)})
+        local closeTween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Quart), {Size = UDim2.new(0, 350, 0, 0)})
         closeTween:Play()
         closeTween.Completed:Connect(function()
-            ScreenGui:Destroy() -- Remove a UI completamente após a animação
+            ScreenGui:Destroy()
         end)
     end)
 
@@ -133,13 +152,16 @@ function Zundium:CreateWindow(title)
     -- Função para adicionar botão
     function Window:AddButton(text, callback)
         local Button = Instance.new("TextButton")
+        local UICorner = Instance.new("UICorner")
         Button.Parent = Container
-        Button.Size = UDim2.new(1, -10, 0, 30)
-        Button.Text = text
+        Button.Size = UDim2.new(1, 0, 0, 35)
         Button.BackgroundColor3 = ZundiumConfig.Theme.AccentColor
+        Button.Text = text
         Button.TextColor3 = ZundiumConfig.Theme.TextColor
-        Button.Font = Enum.Font.SourceSans
+        Button.Font = Enum.Font.Gotham
         Button.TextSize = 14
+        UICorner.Parent = Button
+        UICorner.CornerRadius = UDim.new(0, 6)
         Button.MouseButton1Click:Connect(callback)
         table.insert(self.Elements, Button)
         return Button
@@ -148,25 +170,24 @@ function Zundium:CreateWindow(title)
     -- Função para adicionar toggle
     function Window:AddToggle(text, default, callback)
         local Toggle = Instance.new("TextButton")
+        local UICorner = Instance.new("UICorner")
         local state = default or false
-
         Toggle.Parent = Container
-        Toggle.Size = UDim2.new(1, -10, 0, 30)
-        Toggle.Text = text .. (state and " [ON]" or " [OFF]")
+        Toggle.Size = UDim2.new(1, 0, 0, 35)
         Toggle.BackgroundColor3 = state and ZundiumConfig.Theme.ToggleOnColor or ZundiumConfig.Theme.ToggleOffColor
+        Toggle.Text = text .. (state and " [ON]" or " [OFF]")
         Toggle.TextColor3 = ZundiumConfig.Theme.TextColor
-        Toggle.Font = Enum.Font.SourceSans
+        Toggle.Font = Enum.Font.Gotham
         Toggle.TextSize = 14
-
+        UICorner.Parent = Toggle
+        UICorner.CornerRadius = UDim.new(0, 6)
         Toggle.MouseButton1Click:Connect(function()
             state = not state
             Toggle.Text = text .. (state and " [ON]" or " [OFF]")
             local targetColor = state and ZundiumConfig.Theme.ToggleOnColor or ZundiumConfig.Theme.ToggleOffColor
-            local tween = TweenService:Create(Toggle, TweenInfo.new(ZundiumConfig.AnimationSpeed / 2), {BackgroundColor3 = targetColor})
-            tween:Play()
+            TweenService:Create(Toggle, TweenInfo.new(ZundiumConfig.AnimationSpeed / 2, Enum.EasingStyle.Quad), {BackgroundColor3 = targetColor}):Play()
             callback(state)
         end)
-
         table.insert(self.Elements, Toggle)
         return Toggle
     end
@@ -174,22 +195,23 @@ function Zundium:CreateWindow(title)
     -- Função para adicionar textbox
     function Window:AddTextbox(placeholder, callback)
         local TextBox = Instance.new("TextBox")
+        local UICorner = Instance.new("UICorner")
         TextBox.Parent = Container
-        TextBox.Size = UDim2.new(1, -10, 0, 30)
+        TextBox.Size = UDim2.new(1, 0, 0, 35)
+        TextBox.BackgroundColor3 = ZundiumConfig.Theme.SecondaryColor
         TextBox.PlaceholderText = placeholder
         TextBox.Text = ""
-        TextBox.BackgroundColor3 = ZundiumConfig.Theme.PrimaryColor
         TextBox.TextColor3 = ZundiumConfig.Theme.TextColor
-        TextBox.Font = Enum.Font.SourceSans
+        TextBox.Font = Enum.Font.Gotham
         TextBox.TextSize = 14
         TextBox.ClearTextOnFocus = false
-
+        UICorner.Parent = TextBox
+        UICorner.CornerRadius = UDim.new(0, 6)
         TextBox.FocusLost:Connect(function(enterPressed)
             if enterPressed then
                 callback(TextBox.Text)
             end
         end)
-
         table.insert(self.Elements, TextBox)
         return TextBox
     end
@@ -197,31 +219,38 @@ function Zundium:CreateWindow(title)
     -- Função para adicionar dropdown
     function Window:AddDropdown(options, callback)
         local Dropdown = Instance.new("TextButton")
+        local UICorner = Instance.new("UICorner")
         local DropFrame = Instance.new("Frame")
+        local DropUICorner = Instance.new("UICorner")
         local DropList = Instance.new("UIListLayout")
         local isOpen = false
 
         Dropdown.Parent = Container
-        Dropdown.Size = UDim2.new(1, -10, 0, 30)
-        Dropdown.Text = "Selecione uma opção"
+        Dropdown.Size = UDim2.new(1, 0, 0, 35)
         Dropdown.BackgroundColor3 = ZundiumConfig.Theme.AccentColor
+        Dropdown.Text = "Selecione uma opção"
         Dropdown.TextColor3 = ZundiumConfig.Theme.TextColor
-        Dropdown.Font = Enum.Font.SourceSans
+        Dropdown.Font = Enum.Font.Gotham
         Dropdown.TextSize = 14
+        UICorner.Parent = Dropdown
+        UICorner.CornerRadius = UDim.new(0, 6)
 
         DropFrame.Parent = Container
-        DropFrame.Size = UDim2.new(1, -10, 0, 0)
-        DropFrame.Position = UDim2.new(0, 0, 0, 35)
-        DropFrame.BackgroundColor3 = ZundiumConfig.Theme.PrimaryColor
+        DropFrame.Size = UDim2.new(1, 0, 0, 0)
+        DropFrame.Position = UDim2.new(0, 0, 0, 40)
+        DropFrame.BackgroundColor3 = ZundiumConfig.Theme.SecondaryColor
         DropFrame.ClipsDescendants = true
         DropFrame.Visible = false
+        DropUICorner.Parent = DropFrame
+        DropUICorner.CornerRadius = UDim.new(0, 6)
 
         DropList.Parent = DropFrame
         DropList.SortOrder = Enum.SortOrder.LayoutOrder
+        DropList.Padding = UDim.new(0, 2)
 
         local function updateDropdown()
-            local targetSize = isOpen and UDim2.new(1, -10, 0, #options * 30) or UDim2.new(1, -10, 0, 0)
-            local tween = TweenService:Create(DropFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Quad), {Size = targetSize})
+            local targetSize = isOpen and UDim2.new(1, 0, 0, #options * 37) or UDim2.new(1, 0, 0, 0)
+            local tween = TweenService:Create(DropFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Quart), {Size = targetSize})
             DropFrame.Visible = true
             tween:Play()
             tween.Completed:Connect(function()
@@ -236,14 +265,16 @@ function Zundium:CreateWindow(title)
 
         for _, option in pairs(options) do
             local OptionButton = Instance.new("TextButton")
+            local OptionUICorner = Instance.new("UICorner")
             OptionButton.Parent = DropFrame
-            OptionButton.Size = UDim2.new(1, 0, 0, 30)
-            OptionButton.Text = option
+            OptionButton.Size = UDim2.new(1, 0, 0, 35)
             OptionButton.BackgroundColor3 = ZundiumConfig.Theme.AccentColor
+            OptionButton.Text = option
             OptionButton.TextColor3 = ZundiumConfig.Theme.TextColor
-            OptionButton.Font = Enum.Font.SourceSans
+            OptionButton.Font = Enum.Font.Gotham
             OptionButton.TextSize = 14
-
+            OptionUICorner.Parent = OptionButton
+            OptionUICorner.CornerRadius = UDim.new(0, 6)
             OptionButton.MouseButton1Click:Connect(function()
                 Dropdown.Text = option
                 isOpen = false
@@ -261,11 +292,14 @@ function Zundium:CreateWindow(title)
         local SliderFrame = Instance.new("Frame")
         local SliderLabel = Instance.new("TextLabel")
         local SliderBar = Instance.new("Frame")
+        local SliderFill = Instance.new("Frame")
         local SliderKnob = Instance.new("Frame")
+        local UICornerBar = Instance.new("UICorner")
+        local UICornerFill = Instance.new("UICorner")
         local value = default or min
 
         SliderFrame.Parent = Container
-        SliderFrame.Size = UDim2.new(1, -10, 0, 40)
+        SliderFrame.Size = UDim2.new(1, 0, 0, 50)
         SliderFrame.BackgroundTransparency = 1
 
         SliderLabel.Parent = SliderFrame
@@ -273,20 +307,27 @@ function Zundium:CreateWindow(title)
         SliderLabel.Text = text .. ": " .. value
         SliderLabel.BackgroundTransparency = 1
         SliderLabel.TextColor3 = ZundiumConfig.Theme.TextColor
-        SliderLabel.Font = Enum.Font.SourceSans
+        SliderLabel.Font = Enum.Font.Gotham
         SliderLabel.TextSize = 14
 
         SliderBar.Parent = SliderFrame
-        SliderBar.Size = UDim2.new(1, 0, 0, 10)
-        SliderBar.Position = UDim2.new(0, 0, 0, 25)
+        SliderBar.Size = UDim2.new(1, 0, 0, 8)
+        SliderBar.Position = UDim2.new(0, 0, 0, 30)
         SliderBar.BackgroundColor3 = ZundiumConfig.Theme.SliderColor
-        SliderBar.BorderSizePixel = 0
+        UICornerBar.Parent = SliderBar
+        UICornerBar.CornerRadius = UDim.new(0, 4)
+
+        SliderFill.Parent = SliderBar
+        SliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+        SliderFill.BackgroundColor3 = ZundiumConfig.Theme.AccentColor
+        UICornerFill.Parent = SliderFill
+        UICornerFill.CornerRadius = UDim.new(0, 4)
 
         SliderKnob.Parent = SliderBar
-        SliderKnob.Size = UDim2.new(0, 10, 0, 10)
-        SliderKnob.BackgroundColor3 = ZundiumConfig.Theme.AccentColor
+        SliderKnob.Size = UDim2.new(0, 16, 0, 16)
+        SliderKnob.BackgroundColor3 = ZundiumConfig.Theme.TextColor
         SliderKnob.BorderSizePixel = 0
-        SliderKnob.Position = UDim2.new((value - min) / (max - min), 0, 0, 0)
+        SliderKnob.Position = UDim2.new((value - min) / (max - min), -8, 0, -4)
 
         local dragging = false
         SliderKnob.InputBegan:Connect(function(input)
@@ -305,7 +346,8 @@ function Zundium:CreateWindow(title)
             if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
                 local relativeX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
                 value = math.floor(min + (max - min) * relativeX)
-                SliderKnob.Position = UDim2.new(relativeX, 0, 0, 0)
+                SliderKnob.Position = UDim2.new(relativeX, -8, 0, -4)
+                SliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
                 SliderLabel.Text = text .. ": " .. value
                 callback(value)
             end
@@ -319,11 +361,11 @@ function Zundium:CreateWindow(title)
     function Window:AddLabel(text)
         local Label = Instance.new("TextLabel")
         Label.Parent = Container
-        Label.Size = UDim2.new(1, -10, 0, 30)
+        Label.Size = UDim2.new(1, 0, 0, 30)
         Label.Text = text
         Label.BackgroundTransparency = 1
         Label.TextColor3 = ZundiumConfig.Theme.TextColor
-        Label.Font = Enum.Font.SourceSans
+        Label.Font = Enum.Font.Gotham
         Label.TextSize = 14
         table.insert(self.Elements, Label)
         return Label
