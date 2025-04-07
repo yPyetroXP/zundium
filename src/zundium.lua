@@ -7,17 +7,17 @@ local TweenService = game:GetService("TweenService")
 -- Configurações globais
 local ZundiumConfig = {
     Theme = {
-        PrimaryColor = Color3.fromRGB(30, 30, 35),       -- Fundo escuro sutil
-        AccentColor = Color3.fromRGB(100, 150, 255),     -- Azul claro suave
-        TextColor = Color3.fromRGB(230, 230, 230),       -- Texto quase branco
-        ToggleOnColor = Color3.fromRGB(120, 200, 120),   -- Verde claro
-        ToggleOffColor = Color3.fromRGB(60, 60, 65),     -- Cinza escuro
-        SliderColor = Color3.fromRGB(80, 80, 85),        -- Cinza para sliders
-        Transparency = 0.7                               -- Transparência base
+        PrimaryColor = Color3.fromRGB(20, 20, 25),
+        AccentColor = Color3.fromRGB(0, 200, 255),
+        SecondaryColor = Color3.fromRGB(35, 35, 40),
+        TextColor = Color3.fromRGB(220, 220, 220),
+        ToggleOnColor = Color3.fromRGB(0, 255, 120),
+        ToggleOffColor = Color3.fromRGB(50, 50, 55),
+        SliderColor = Color3.fromRGB(80, 80, 85)
     },
-    Version = "1.4 by yPyetroXP",
-    AnimationSpeed = 0.2 -- Animações rápidas e fluidas
-}
+    Version = "1.3 by yPyetroXP",
+    AnimationSpeed = 0.25
+} -- <--- Faltava este "}"
 
 -- Função principal para criar uma janela
 function Zundium:CreateWindow(title)
