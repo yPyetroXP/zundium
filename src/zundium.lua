@@ -8,17 +8,17 @@ local UserInputService = game:GetService("UserInputService")
 -- Configurações globais
 local ZundiumConfig = {
     Theme = {
-        PrimaryColor = Color3.fromRGB(30, 30, 35),
-        AccentColor = Color3.fromRGB(100, 150, 255),
-        TextColor = Color3.fromRGB(230, 230, 230),
-        ToggleOnColor = Color3.fromRGB(120, 200, 120),
-        ToggleOffColor = Color3.fromRGB(60, 60, 65),
+        PrimaryColor = Color3.fromRGB(20, 20, 25),
+        AccentColor = Color3.fromRGB(0, 200, 255),
+        SecondaryColor = Color3.fromRGB(35, 35, 40),
+        TextColor = Color3.fromRGB(220, 220, 220),
+        ToggleOnColor = Color3.fromRGB(0, 255, 120),
+        ToggleOffColor = Color3.fromRGB(50, 50, 55),
         SliderColor = Color3.fromRGB(80, 80, 85),
-        Transparency = 0.7
+        Transparency = 0.2  -- Adicionado a propriedade de transparência que faltava
     },
-    Version = "1.6 by yPyetroXP",
-    AnimationSpeed = 0.2,
-    ToggleKey = Enum.KeyCode.Insert
+    Version = "1.3 by yPyetroXP",
+    AnimationSpeed = 0.25
 }
 
 -- Função principal para criar uma janela
@@ -39,7 +39,7 @@ function Zundium:CreateWindow(title)
     ScreenGui.ResetOnSpawn = false
 
     MainFrame.Parent = ScreenGui
-    MainFrame.Size = UDim2.new(0, 300, 0, 350)
+    MainFrame.Size = UDim2.new(0, 300, 0, 0) -- Tamanho menor e inicial fechado
     MainFrame.Position = UDim2.new(0.5, -150, 0.5, -200)
     MainFrame.BackgroundColor3 = ZundiumConfig.Theme.PrimaryColor
     MainFrame.BackgroundTransparency = ZundiumConfig.Theme.Transparency
@@ -142,6 +142,26 @@ function Zundium:CreateWindow(title)
         end)
     end)
 
+    -- Sistema de tecla de atalho (F9)
+    local isVisible = true
+    local function toggleVisibility()
+        isVisible = not isVisible
+        local targetSize = isVisible and UDim2.new(0, 300, 0, 350) or UDim2.new(0, 300, 0, 0)
+        local tween = TweenService:Create(MainFrame, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Sine), {Size = targetSize})
+        tween:Play()
+        if not isVisible then
+            Container.Visible = false
+        else
+            wait(ZundiumConfig.AnimationSpeed)
+            Container.Visible = true
+        end
+    end
+    UserInputService.InputBegan:Connect(function(input)
+        if input.KeyCode == Enum.KeyCode.F9 then
+            toggleVisibility()
+        end
+    end)
+
     local isVisible = true
     local function toggleVisibility()
         isVisible = not isVisible
@@ -205,19 +225,15 @@ function Zundium:CreateWindow(title)
         Button.TextSize = 14
         UICorner.Parent = Button
         UICorner.CornerRadius = UDim.new(0, 6)
-
-        Button.MouseEnter:Connect(function()
-            TweenService:Create(Button, TweenInfo.new(0.1), {BackgroundTransparency = 0.7}):Play()
-        end)
-        Button.MouseLeave:Connect(function()
-            TweenService:Create(Button, TweenInfo.new(0.1), {BackgroundTransparency = 0.85}):Play()
-        end)
-
-        local buttonObj = createElementCallbacks(Button, callback)
+        
+        -- Adicionado tratamento de erro no callback
         Button.MouseButton1Click:Connect(function()
-            buttonObj:TriggerCallbacks()
+            local success, error = pcall(callback)
+            if not success then
+                warn("Erro no callback do botão '" .. text .. "':", error)
+            end
         end)
-
+        
         table.insert(self.Elements, Button)
         return buttonObj
     end
@@ -236,29 +252,23 @@ function Zundium:CreateWindow(title)
         Toggle.TextSize = 14
         UICorner.Parent = Toggle
         UICorner.CornerRadius = UDim.new(0, 6)
-
-        Toggle.MouseEnter:Connect(function()
-            TweenService:Create(Toggle, TweenInfo.new(0.1), {BackgroundTransparency = 0.7}):Play()
-        end)
-        Toggle.MouseLeave:Connect(function()
-            TweenService:Create(Toggle, TweenInfo.new(0.1), {BackgroundTransparency = 0.85}):Play()
-        end)
-
-        local toggleObj = createElementCallbacks(Toggle, callback)
-        toggleObj.GetState = function() return state end
-        toggleObj.SetState = function(self, newState)
-            state = newState
+        
+        Toggle.MouseButton1Click:Connect(function()
+            state = not state
             Toggle.Text = text .. (state and " [ON]" or " [OFF]")
             local targetColor = state and ZundiumConfig.Theme.ToggleOnColor or ZundiumConfig.Theme.ToggleOffColor
             TweenService:Create(Toggle, TweenInfo.new(ZundiumConfig.AnimationSpeed, Enum.EasingStyle.Sine), {BackgroundColor3 = targetColor}):Play()
-        end
-
-        Toggle.MouseButton1Click:Connect(function()
-            state = not state
-            toggleObj:SetState(state)
-            toggleObj:TriggerCallbacks(state)
+            
+            -- Adicionado tratamento de erro no callback
+            local success, error = pcall(function()
+                callback(state)
+            end)
+            
+            if not success then
+                warn("Erro no callback do toggle '" .. text .. "':", error)
+            end
         end)
-
+        
         table.insert(self.Elements, Toggle)
         return toggleObj
     end
@@ -277,17 +287,20 @@ function Zundium:CreateWindow(title)
         TextBox.TextSize = 14
         UICorner.Parent = TextBox
         UICorner.CornerRadius = UDim.new(0, 6)
-
-        local textboxObj = createElementCallbacks(TextBox, callback)
-        textboxObj.GetText = function() return TextBox.Text end
-        textboxObj.SetText = function(self, newText) TextBox.Text = newText end
-
+        
         TextBox.FocusLost:Connect(function(enterPressed)
             if enterPressed then
-                textboxObj:TriggerCallbacks(TextBox.Text)
+                -- Adicionado tratamento de erro no callback
+                local success, error = pcall(function()
+                    callback(TextBox.Text)
+                end)
+                
+                if not success then
+                    warn("Erro no callback do textbox:", error)
+                end
             end
         end)
-
+        
         table.insert(self.Elements, TextBox)
         return textboxObj
     end
@@ -310,13 +323,6 @@ function Zundium:CreateWindow(title)
         Dropdown.TextSize = 14
         UICorner.Parent = Dropdown
         UICorner.CornerRadius = UDim.new(0, 6)
-
-        Dropdown.MouseEnter:Connect(function()
-            TweenService:Create(Dropdown, TweenInfo.new(0.1), {BackgroundTransparency = 0.7}):Play()
-        end)
-        Dropdown.MouseLeave:Connect(function()
-            TweenService:Create(Dropdown, TweenInfo.new(0.1), {BackgroundTransparency = 0.85}):Play()
-        end)
 
         DropFrame.Parent = Container
         DropFrame.Size = UDim2.new(1, 0, 0, 0)
@@ -364,19 +370,20 @@ function Zundium:CreateWindow(title)
             OptionButton.TextSize = 14
             OptionUICorner.Parent = OptionButton
             OptionUICorner.CornerRadius = UDim.new(0, 6)
-
-            OptionButton.MouseEnter:Connect(function()
-                TweenService:Create(OptionButton, TweenInfo.new(0.1), {BackgroundTransparency = 0.7}):Play()
-            end)
-            OptionButton.MouseLeave:Connect(function()
-                TweenService:Create(OptionButton, TweenInfo.new(0.1), {BackgroundTransparency = 0.85}):Play()
-            end)
-
+            
             OptionButton.MouseButton1Click:Connect(function()
                 Dropdown.Text = option
                 isOpen = false
                 updateDropdown()
-                dropdownObj:TriggerCallbacks(option)
+                
+                -- Adicionado tratamento de erro no callback
+                local success, error = pcall(function()
+                    callback(option)
+                end)
+                
+                if not success then
+                    warn("Erro no callback do dropdown:", error)
+                end
             end)
         end
 
@@ -426,15 +433,8 @@ function Zundium:CreateWindow(title)
         SliderKnob.BackgroundColor3 = ZundiumConfig.Theme.TextColor
         SliderKnob.BackgroundTransparency = 0.2
         SliderKnob.Position = UDim2.new((value - min) / (max - min), -5, 0, -3)
-
-        local sliderObj = createElementCallbacks(SliderKnob, callback)
-        sliderObj.GetValue = function() return value end
-        sliderObj.SetValue = function(self, newValue)
-            value = math.clamp(newValue, min, max)
-            SliderKnob.Position = UDim2.new((value - min) / (max - min), -5, 0, -3)
-            SliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
-            SliderLabel.Text = text .. ": " .. value
-        end
+        UICornerKnob.Parent = SliderKnob
+        UICornerKnob.CornerRadius = UDim.new(0, 5)  -- Arredonda o knob
 
         local dragging = false
         SliderKnob.InputBegan:Connect(function(input)
@@ -453,8 +453,18 @@ function Zundium:CreateWindow(title)
             if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
                 local relativeX = math.clamp((input.Position.X - SliderBar.AbsolutePosition.X) / SliderBar.AbsoluteSize.X, 0, 1)
                 value = math.floor(min + (max - min) * relativeX)
-                sliderObj:SetValue(value)
-                sliderObj:TriggerCallbacks(value)
+                SliderKnob.Position = UDim2.new(relativeX, -5, 0, -3)
+                SliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
+                SliderLabel.Text = text .. ": " .. value
+                
+                -- Adicionado tratamento de erro no callback
+                local success, error = pcall(function()
+                    callback(value)
+                end)
+                
+                if not success then
+                    warn("Erro no callback do slider:", error)
+                end
             end
         end)
 
